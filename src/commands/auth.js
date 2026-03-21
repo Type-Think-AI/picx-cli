@@ -15,5 +15,6 @@ export async function auth() {
       authenticated: false,
       message: 'No API key found. Set it with: export PICX_API_KEY=pxsk_YOUR_KEY\nGet your key at: https://picxstudio.com/developer',
     }, null, 2));
+    process.exit(1);
   }
 }

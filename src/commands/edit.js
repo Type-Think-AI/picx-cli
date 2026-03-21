@@ -3,7 +3,7 @@ import { apiRequest } from '../api.js';
 export async function edit(instruction, options) {
   if (!options.imageUrl) {
     console.log(JSON.stringify({ success: false, error: '--image-url is required' }, null, 2));
-    return;
+    process.exit(1);
   }
 
   const body = {
@@ -15,4 +15,5 @@ export async function edit(instruction, options) {
 
   const result = await apiRequest('POST', '/v1/images/edit', body);
   console.log(JSON.stringify(result, null, 2));
+  if (!result.success) process.exit(1);
 }
