@@ -1,0 +1,47 @@
+{
+  "name": "picx-cli",
+  "version": "1.0.0",
+  "description": "AI image generation from the terminal - Generate and edit images using PicX Studio's multi-model API",
+  "bin": {
+    "picx": "./bin/picx.js"
+  },
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node bin/picx.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "SKILL.md",
+    "README.md"
+  ],
+  "keywords": [
+    "picx",
+    "ai",
+    "image-generation",
+    "image",
+    "cli",
+    "openclaw",
+    "gemini",
+    "text-to-image",
+    "ai-art",
+    "generative-ai"
+  ],
+  "author": "PicX Studio <hello@picxstudio.com>",
+  "license": "MIT",
+  "homepage": "https://picxstudio.com/developer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Type-Think-AI/picx-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Type-Think-AI/picx-cli/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.0.0"
+  }
+}
