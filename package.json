@@ -1,6 +1,6 @@
 {
   "name": "picx-cli",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "PicX Studio CLI - Full access to image generation, albums, templates, moodboards, references and more from the terminal",
   "bin": {
     "picx": "./bin/picx.js"

@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name('picx')
   .description('PicX Studio CLI - Full access to PicX Studio API from the terminal')
-  .version('2.0.0');
+  .version('2.0.2');
 
 // Register all command modules
 registerGenerate(program);
