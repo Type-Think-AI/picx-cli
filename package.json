@@ -1,14 +1,15 @@
 {
   "name": "picx-cli",
-  "version": "1.0.0",
-  "description": "AI image generation from the terminal - Generate and edit images using PicX Studio's multi-model API",
+  "version": "2.0.0",
+  "description": "PicX Studio CLI - Full access to image generation, albums, templates, moodboards, references and more from the terminal",
   "bin": {
     "picx": "./bin/picx.js"
   },
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node bin/picx.js"
+    "start": "node bin/picx.js",
+    "test": "node bin/picx.js --help"
   },
   "files": [
     "bin/",
@@ -26,7 +27,10 @@
     "gemini",
     "text-to-image",
     "ai-art",
-    "generative-ai"
+    "generative-ai",
+    "moodboards",
+    "templates",
+    "albums"
   ],
   "author": "PicX Studio <hello@picxstudio.com>",
   "license": "MIT",

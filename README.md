@@ -1,6 +1,6 @@
-# picx-cli
+# PicX Studio CLI
 
-AI image generation from the terminal. Generate and edit images using [PicX Studio](https://picxstudio.com)'s multi-model API.
+Full access to PicX Studio API from the terminal. Generate images, manage albums, browse templates, curate moodboards, and more.
 
 ## Install
 
@@ -21,54 +21,123 @@ export PICX_API_KEY=pxsk_your_key_here
 
 Add it to `~/.bashrc` or `~/.zshrc` to persist across sessions.
 
-## Usage
-
-### Generate an image
+## Quick Start
 
 ```bash
+# Generate an image
 picx generate "a cat in a spacesuit on Mars"
+
+# List your albums
+picx albums list
+
+# Browse templates
+picx templates list --search "portrait"
+
+# Explore public moodboards
+picx moodboards discover --sort-by popular
+
+# Upload a local image
+picx upload ./photo.png
 ```
 
-With options:
+## Commands
+
+### Image Generation
 
 ```bash
 picx generate "neon city at night" --model gemini-3-pro-image-preview --size 2K --aspect-ratio 16:9
+picx edit "change background to sunset" --image-url https://example.com/photo.jpg
+picx stream "cyberpunk cityscape" --num-images 4 --model gemini-3.1-flash-image-preview
 ```
 
-| Flag | Short | Description | Default |
-|------|-------|-------------|---------|
-| `--model` | `-m` | Model ID (run `picx models` to see all) | `gemini-3.1-flash-image-preview` |
-| `--size` | `-s` | `1K`, `2K`, or `4K` | `1K` |
-| `--aspect-ratio` | `-a` | `1:1`, `16:9`, `9:16`, `4:3`, `3:2` | `1:1` |
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--model` | `-m` | Model ID (run `picx models` to see all) |
+| `--size` | `-s` | `1K`, `2K`, or `4K` |
+| `--aspect-ratio` | `-a` | `1:1`, `16:9`, `9:16`, `4:3`, `3:2` |
 
-### Edit an image
+### Albums (Chat Histories)
 
 ```bash
-picx edit "change the background to a beach sunset" --image-url https://example.com/photo.jpg
+picx albums list --limit 20 --offset 0
+picx albums get <album-id>
+picx albums create "My Project"
+picx albums update <album-id> --title "New Title"
+picx albums delete <album-id>
+picx albums archive <album-id>
+picx albums pin <album-id>
+picx albums gallery --limit 50
+picx albums share <album-id>
+picx albums unshare <album-id>
+picx albums shared <share-id>
+picx albums public
 ```
 
-| Flag | Short | Description | Required |
-|------|-------|-------------|----------|
-| `--image-url` | `-i` | URL of the image to edit | Yes |
-| `--model` | `-m` | Model ID | No |
-| `--size` | `-s` | `1K`, `2K`, or `4K` | No |
-
-### List models
+### Templates
 
 ```bash
-picx models
+picx templates list --search "portrait" --category photography --limit 10
+picx templates get <template-id>
+picx templates categories
+picx templates create --name "Sunset Glow" --prompt "golden hour..." --tags landscape,sunset
+picx templates update <template-id> --name "New Name"
+picx templates delete <template-id>
 ```
 
-### Check auth
+### Moodboards
 
 ```bash
-picx auth
+picx moodboards list
+picx moodboards get <id>
+picx moodboards get-by-slug <slug>
+picx moodboards create "My Collection" --description "Best work" --public --tags design,minimal
+picx moodboards update <id> --name "Updated" --public true
+picx moodboards delete <id>
+
+# Templates & Albums in moodboard
+picx moodboards templates <moodboard-id>
+picx moodboards add-template <moodboard-id> <template-id>
+picx moodboards add-templates-bulk <moodboard-id> --ids 1,2,3
+picx moodboards remove-template <moodboard-id> <template-id>
+picx moodboards albums <moodboard-id>
+picx moodboards add-album <moodboard-id> <album-id>
+picx moodboards remove-album <moodboard-id> <album-id>
+
+# Discovery & Social
+picx moodboards discover --search "minimal" --sort-by popular
+picx moodboards featured
+picx moodboards share <id>
+picx moodboards like <id>
+picx moodboards unlike <id>
+picx moodboards clone <id>
 ```
 
-### View usage
+### Image References
 
 ```bash
-picx usage --period 30d
+picx references list
+picx references get <id>
+picx references create "brand-logo" --image-urls https://cdn.example.com/logo.png
+picx references update <id> --name "new-name"
+picx references delete <id>
+```
+
+### Account & Utilities
+
+```bash
+picx auth                    # Check API key
+picx me                      # User profile
+picx usage --period 30d      # Usage stats
+picx models                  # List models
+picx model-config            # Full model config
+picx upload ./photo.png      # Upload image
+```
+
+### Discovery
+
+```bash
+picx discovery tags --source all --limit 50
+picx discovery tags-detailed --source templates
 ```
 
 ## Output
@@ -81,30 +150,16 @@ All commands return JSON:
   "id": "img_a1b2c3d4e5f6",
   "url": "https://cdn.picxstudio.com/api/generated/image.png",
   "model": "gemini-3.1-flash-image-preview",
-  "size": "1K",
-  "aspect_ratio": "1:1",
-  "credits_used": 20,
-  "created_at": "2026-03-20T12:00:00Z"
+  "credits_used": 20
 }
 ```
 
-On error:
+Use `jq` for filtering:
 
-```json
-{
-  "success": false,
-  "error": "Insufficient credits"
-}
+```bash
+picx albums list | jq '.items[].title'
+picx models | jq '.models[] | {id, name}'
 ```
-
-## Models
-
-| Model | Name | 1K | 2K | 4K |
-|-------|------|----|----|----|
-| `gemini-3.1-flash-image-preview` | Nano Banana 2 | 20 | 20 | 40 |
-| `gemini-3-pro-image-preview` | Nano Banana Pro | 50 | 50 | 100 |
-
-Run `picx models` to see the full live list.
 
 ## Environment Variables
 
@@ -115,28 +170,14 @@ Run `picx models` to see the full live list.
 
 ## Use with AI Agents (OpenClaw)
 
-This CLI is designed for AI agent use. Set `PICX_API_KEY` in your environment and any OpenClaw-compatible agent can call `picx` commands to generate images.
+This CLI is designed for AI agent use. Set `PICX_API_KEY` in your environment and any OpenClaw-compatible agent can call `picx` commands.
 
 See [SKILL.md](./SKILL.md) for the OpenClaw skill definition.
 
-## REST API
-
-You can also call the API directly without the CLI:
-
-```bash
-curl -X POST https://api.picxstudio.com/v1/images/generate \
-  -H "Authorization: Bearer pxsk_YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "a sunset over mountains", "size": "1K"}'
-```
-
-Full API docs at [picxstudio.com/developer](https://picxstudio.com/developer).
-
 ## Links
 
-- [Developer Portal](https://picxstudio.com/developer) - Get your API key and explore docs
+- [Developer Portal](https://picxstudio.com/developer) - Get your API key
 - [PicX Studio](https://picxstudio.com) - AI image generation app
-- [API Reference](https://picxstudio.com/developer) - Full endpoint documentation
 
 ## License
 

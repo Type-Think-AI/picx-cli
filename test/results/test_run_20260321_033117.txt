@@ -1,0 +1,244 @@
+==========================================
+PicX API Test Run - Sat Mar 21 03:31:17 EDT 2026
+API URL: http://localhost:8000
+API Key: pxsk_e838e...e53b
+==========================================
+
+-------------------------------------------
+TEST 1: GET /v1/models (public, no auth)
+  GET_PUBLIC http://localhost:8000/v1/models
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "models": [
+            {
+                "id": "gemini-3-pro-image-preview",
+                "name": "Nano Banana Pro",
+                "type": "image",
+                "credits": {
+                    "1K": 50,
+                    "2K": 50,
+                    "4K": 100
+                }
+            },
+            {
+                "id": "gemini-3.1-flash-image-preview",
+                "name": "Nano Banana 2 \ud83c\udf4c\ud83c\udf4c",
+                "type": "image",
+                "credits": {
+                    "1K": 20,
+                    "2K": 20...
+  RESULT: PASS
+
+-------------------------------------------
+TEST 2: GET /v1/models (with auth)
+  GET http://localhost:8000/v1/models
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "models": [
+            {
+                "id": "gemini-3-pro-image-preview",
+                "name": "Nano Banana Pro",
+                "type": "image",
+                "credits": {
+                    "1K": 50,
+                    "2K": 50,
+                    "4K": 100
+                }
+            },
+            {
+                "id": "gemini-3.1-flash-image-preview",
+                "name": "Nano Banana 2 \ud83c\udf4c\ud83c\udf4c",
+                "type": "image",
+                "credits": {
+                    "1K": 20,
+                    "2K": 20...
+  RESULT: PASS
+
+-------------------------------------------
+TEST 3: POST /v1/images/generate (basic)
+  POST http://localhost:8000/v1/images/generate
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "id": "img_7ae368872648",
+        "url": "https://cdn.picxstudio.com/api/generated/image_21665794-9758-4a59-9573-a91d00299226.png",
+        "model": "gemini-3.1-flash-image-preview",
+        "size": "1K",
+        "aspect_ratio": null,
+        "credits_used": 20,
+        "created_at": "2026-03-21T07:33:21.852480Z"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 4: POST /v1/images/generate (with model, size, aspect_ratio)
+  POST http://localhost:8000/v1/images/generate
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "id": "img_537f439a4e58",
+        "url": "https://cdn.picxstudio.com/api/generated/image_8871aa96-6e21-41d8-9a22-6e52cdefd077.png",
+        "model": "gemini-3.1-flash-image-preview",
+        "size": "1K",
+        "aspect_ratio": "16:9",
+        "credits_used": 20,
+        "created_at": "2026-03-21T07:35:37.231390Z"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 5: POST /v1/images/generate (no auth - expect 401)
+  POST_NO_AUTH http://localhost:8000/v1/images/generate
+  Status: 401 (expected: 401)
+  Response:
+    {
+        "detail": "API key required. Use Authorization: Bearer pxsk_..."
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 6: POST /v1/images/generate (empty prompt - expect 422)
+  POST http://localhost:8000/v1/images/generate
+  Status: 422 (expected: 422)
+  Response:
+    {
+        "detail": [
+            {
+                "type": "string_too_short",
+                "loc": [
+                    "body",
+                    "prompt"
+                ],
+                "msg": "String should have at least 1 character",
+                "input": "",
+                "ctx": {
+                    "min_length": 1
+                }
+            }
+        ]
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 7: POST /v1/images/generate (invalid model - expect 400)
+  POST http://localhost:8000/v1/images/generate
+  Status: 400 (expected: 400)
+  Response:
+    {
+        "detail": "Unknown model: fake-model-xyz"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 8: POST /v1/images/edit (basic)
+  POST http://localhost:8000/v1/images/edit
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "id": "img_0ac995439fac",
+        "url": "https://cdn.picxstudio.com/api/edited/image_94d2c66d-2988-4c5f-9a15-60b7b72a6f13.png",
+        "model": "gemini-3.1-flash-image-preview",
+        "size": "1K",
+        "aspect_ratio": null,
+        "credits_used": 20,
+        "created_at": "2026-03-21T07:36:45.864893Z"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 9: POST /v1/images/edit (no auth - expect 401)
+  POST_NO_AUTH http://localhost:8000/v1/images/edit
+  Status: 401 (expected: 401)
+  Response:
+    {
+        "detail": "API key required. Use Authorization: Bearer pxsk_..."
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 10: GET /v1/account/usage (default period)
+  GET http://localhost:8000/v1/account/usage
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "total_requests": 0,
+        "successful_requests": 0,
+        "failed_requests": 0,
+        "total_cost_usd": 0.0,
+        "credits_used": 0,
+        "period_days": 30,
+        "model_breakdown": {}
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 11: GET /v1/account/usage?period=7d
+  GET http://localhost:8000/v1/account/usage?period=7d
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "total_requests": 0,
+        "successful_requests": 0,
+        "failed_requests": 0,
+        "total_cost_usd": 0.0,
+        "credits_used": 0,
+        "period_days": 7,
+        "model_breakdown": {}
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 12: GET /v1/account/usage (no auth - expect 401)
+  GET_PUBLIC http://localhost:8000/v1/account/usage
+  Status: 401 (expected: 401)
+  Response:
+    {
+        "detail": "API key required. Use Authorization: Bearer pxsk_..."
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 13: POST /v1/images/generate (bad API key - expect 401)
+  POST http://localhost:8000/v1/images/generate
+  Status: 200 (expected: 401)
+  Response:
+    {
+        "id": "img_8fa85da1ae6a",
+        "url": "https://cdn.picxstudio.com/api/generated/image_51a20543-9dec-49eb-ba9c-5f0fa394641c.png",
+        "model": "gemini-3.1-flash-image-preview",
+        "size": "1K",
+        "aspect_ratio": null,
+        "credits_used": 20,
+        "created_at": "2026-03-21T07:37:48.732632Z"
+    }
+  RESULT: FAIL
+
+-------------------------------------------
+TEST 14: GET /user/api-key (get masked key)
+  GET http://localhost:8000/user/api-key
+  Status: 200 (expected: 200)
+  Response:
+    {
+        "api_key": "pxsk_...e53b",
+        "has_key": true
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 15: POST /v1/images/generate (invalid key - expect 401)
+  Status: 401 (expected: 401)
+  Response:
+    {
+        "detail": "Invalid API key"
+    }
+  RESULT: PASS
+
+==========================================
+SUMMARY
+  Total:  15
+  Passed: 14
+  Failed: 1
+  SOME TESTS FAILED
+==========================================

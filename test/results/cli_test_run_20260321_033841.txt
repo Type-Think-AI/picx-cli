@@ -1,0 +1,206 @@
+==========================================
+PicX CLI Test Run - Sat Mar 21 03:38:41 EDT 2026
+API URL: http://localhost:8000
+API Key: pxsk_e838e...e53b
+CLI: ./test/../bin/picx.js
+==========================================
+
+-------------------------------------------
+TEST 1: picx --version
+  Command: node ./test/../bin/picx.js --version
+  Exit code: 0
+  Output:
+    1.0.0
+  RESULT: PASS
+
+-------------------------------------------
+TEST 2: picx --help
+  Command: node ./test/../bin/picx.js --help
+  Exit code: 0
+  Output:
+    Usage: picx [options] [command]
+    
+    PicX Studio CLI - AI image generation from the terminal
+    
+    Options:
+      -V, --version                 output the version number
+      -h, --help                    display help for command
+    
+    Commands:
+      generate [options] <prompt>   Generate an image from a text prompt
+      edit [options] <instruction>  Edit an image with an instruction
+      models                        List available image models
+      auth                          Check API key authentication status
+      usage [options]               Show API usage statistics
+      help [command]                display help for comma...
+  RESULT: PASS
+
+-------------------------------------------
+TEST 3: picx models (list available models)
+  Command: node ./test/../bin/picx.js models
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "models": [
+        {
+          "id": "gemini-3-pro-image-preview",
+          "name": "Nano Banana Pro",
+          "type": "image",
+          "credits": {
+            "1K": 50,
+            "2K": 50,
+            "4K": 100
+          }
+        },
+        {
+          "id": "gemini-3.1-flash-image-preview",
+          "name": "Nano Banana 2 🍌🍌",
+          "type": "image",
+          "credits": {
+            "1K": 20,
+            "2K": 20,
+            "4K": 40
+          }
+        }
+      ]
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 4: picx auth (show API key status)
+  Command: node ./test/../bin/picx.js auth
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "authenticated": true,
+      "api_key": "pxsk_...e53b",
+      "message": "API key is set via PICX_API_KEY environment variable"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 5: picx generate (basic prompt)
+  Command: node ./test/../bin/picx.js generate "a red circle on white background"
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "id": "img_ecb1cf29006b",
+      "url": "https://cdn.picxstudio.com/api/generated/image_7dc857d2-3b78-41b7-a0fe-b32db5c5e49f.png",
+      "model": "gemini-3.1-flash-image-preview",
+      "size": "1K",
+      "aspect_ratio": null,
+      "credits_used": 20,
+      "created_at": "2026-03-21T07:39:31.002087Z"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 6: picx generate (with --size and --aspect-ratio)
+  Command: node ./test/../bin/picx.js generate "a blue square" --size 1K --aspect-ratio 16:9
+  Exit code: 0
+  Output:
+    {
+      "success": false,
+      "error": "STRUCTURED_ERROR:{\"error_type\": \"GENERATION_FAILED\", \"operation\": \"generate\", \"success\": false, \"finish_reason\": \"FINISH_REASON_UNSPECIFIED\", \"user_message\": \"Failed to generate image.\", \"suggestion\": \"Please try again with a different prompt or contact support.\", \"prompt_preview\": \"\\\"a\"}"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 7: picx generate (with --model)
+  Command: node ./test/../bin/picx.js generate "a green triangle" --model gemini-3.1-flash-image-preview
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "id": "img_191c82ca8746",
+      "url": "https://cdn.picxstudio.com/api/generated/image_f8781632-2971-4617-baa7-d1ddc82d83fd.png",
+      "model": "gemini-3.1-flash-image-preview",
+      "size": "1K",
+      "aspect_ratio": null,
+      "credits_used": 20,
+      "created_at": "2026-03-21T07:40:31.033975Z"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 8: picx edit (basic edit)
+  Command: node ./test/../bin/picx.js edit "make it darker" --image-url https://picsum.photos/id/237/200/300
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "id": "img_7c04eb5f32c3",
+      "url": "https://cdn.picxstudio.com/api/edited/image_8e93b79d-216d-4c11-8409-fd1479faf960.png",
+      "model": "gemini-3.1-flash-image-preview",
+      "size": "1K",
+      "aspect_ratio": null,
+      "credits_used": 20,
+      "created_at": "2026-03-21T07:41:51.715828Z"
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 9: picx usage (default period)
+  Command: node ./test/../bin/picx.js usage
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "total_requests": 0,
+      "successful_requests": 0,
+      "failed_requests": 0,
+      "total_cost_usd": 0,
+      "credits_used": 0,
+      "period_days": 30,
+      "model_breakdown": {}
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 10: picx usage --period 7d
+  Command: node ./test/../bin/picx.js usage --period 7d
+  Exit code: 0
+  Output:
+    {
+      "success": true,
+      "total_requests": 0,
+      "successful_requests": 0,
+      "failed_requests": 0,
+      "total_cost_usd": 0,
+      "credits_used": 0,
+      "period_days": 7,
+      "model_breakdown": {}
+    }
+  RESULT: PASS
+
+-------------------------------------------
+TEST 11: picx generate (invalid model - expect failure)
+  Command: node ./test/../bin/picx.js generate "test" --model fake-model-xyz
+  Exit code: 0
+  Output:
+    {
+      "success": false,
+      "error": "Unknown model: fake-model-xyz"
+    }
+  RESULT: FAIL
+
+-------------------------------------------
+TEST 12: picx generate (no API key - expect failure)
+  Exit code: 0
+  Output:
+    {
+      "success": false,
+      "error": "PICX_API_KEY not set. Run: export PICX_API_KEY=pxsk_..."
+    }
+  RESULT: FAIL
+
+==========================================
+SUMMARY
+  Total:  12
+  Passed: 10
+  Failed: 2
+  SOME TESTS FAILED
+==========================================
