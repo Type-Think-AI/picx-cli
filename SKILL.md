@@ -1,6 +1,6 @@
 ---
 name: picx
-description: PicX Studio CLI - Full access to image generation, albums, templates, moodboards, references and discovery from the terminal.
+description: PicX Studio CLI - Full access to image/video generation, albums, templates, moodboards, references and discovery from the terminal.
 metadata:
   openclaw:
     requires:
@@ -14,7 +14,7 @@ metadata:
 
 # PicX Studio CLI
 
-Full access to PicX Studio API from the terminal. Generate images, manage albums, browse templates, curate moodboards, and more.
+Full access to PicX Studio API from the terminal. Generate images and videos, manage albums, browse templates, curate moodboards, and more.
 
 ## Setup
 
@@ -22,18 +22,34 @@ The `PICX_API_KEY` environment variable must be set. Get your key at https://pic
 
 ## Commands
 
-### Image Generation
+### Albums — Generate Images & Videos
+
+Generation is done via the `albums generate` subcommand. It streams results via SSE and auto-saves to an album.
 
 ```bash
-# Generate an image
-picx generate "a cat in a spacesuit" --model gemini-3.1-flash-image-preview --size 1K --aspect-ratio 16:9
+# Generate an image (default tool=image)
+picx albums generate "a cat in a spacesuit" -m gemini-3.1-flash-image-preview -s 2K -a 16:9
+
+# Multiple images
+picx albums generate "cyberpunk city" -n 4
+
+# Multi-model comparison
+picx albums generate "a red car" --models gemini-3.1-flash-image-preview,gemini-3-pro-image-preview
 
 # Edit an existing image
-picx edit "change background to sunset" --image-url https://example.com/photo.jpg --model gemini-3.1-flash-image-preview
+picx albums generate "change background to sunset" -i https://example.com/photo.jpg
 
-# Streaming generation via AI agent (SSE, multi-model, video support)
-picx stream "cyberpunk cityscape at night" --num-images 4 --model gemini-3.1-flash-image-preview
-picx stream "a serene lake" --tool video_prompt --video-model veo-3.1 --video-duration 5s
+# Continue conversation in existing album
+picx albums generate "make it brighter" --album-id <uuid>
+
+# Video from prompt
+picx albums generate "waves crashing on rocks" --tool video_prompt --video-model veo-3.1 --video-duration 8s --video-orientation landscape
+
+# Video from start/end frames
+picx albums generate "smooth zoom" --tool video_frames --start-frame https://example.com/start.jpg --end-frame https://example.com/end.jpg
+
+# Video from reference images
+picx albums generate "a person walking" --tool video_references
 ```
 
 ### Albums (Chat Histories)
@@ -57,10 +73,13 @@ picx albums public                      # Browse public albums
 
 ```bash
 picx templates list --search "portrait" --category photography --limit 10
+picx templates list --media-type image --featured true --tags "landscape,sunset"
 picx templates get <template-id>
 picx templates categories
-picx templates create --name "Sunset Glow" --prompt "golden hour..." --category photography --tags landscape,sunset
-picx templates update <template-id> --name "New Name"
+picx templates create --name "Sunset Glow" --prompt "golden hour..." --category photography --tags landscape,sunset --image-url https://... --media-type image --target-model gemini-3.1-flash-image-preview
+picx templates create --name "My Style" --prompt "portrait..." --image-url ./thumb.png --preview-images ./img1.png,./img2.jpg
+picx templates update <template-id> --name "New Name" --tags new,tags
+picx templates update <template-id> --image-url ./new-thumb.png --preview-images ./a.png,./b.png
 picx templates delete <template-id>
 ```
 
@@ -111,7 +130,7 @@ picx references delete <id>
 
 ```bash
 picx auth                              # Check API key status
-picx me                                # Get user profile
+picx me                                # Get user profile with credit balance
 picx usage --period 30d                # API usage stats
 picx models                            # List image/video models
 picx model-config                      # Full model configuration
@@ -132,10 +151,9 @@ All commands output structured JSON:
 ```json
 {
   "success": true,
-  "id": "img_abc123",
-  "url": "https://cdn.picxstudio.com/...",
-  "model": "gemini-3.1-flash-image-preview",
-  "credits_used": 20
+  "images": ["https://cdn.picxstudio.com/agno/images/img_abc123.png"],
+  "album_id": "uuid-here",
+  "album_url": "https://picxstudio.com/c/uuid-here"
 }
 ```
 

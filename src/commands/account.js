@@ -15,9 +15,15 @@ async function auth() {
 }
 
 async function me() {
-  const result = await api('GET', '/user/me');
-  out(result);
-  if (!result.success) process.exit(1);
+  // Try new endpoint with credits first, fallback to legacy
+  const result = await api('GET', '/v1/account/me');
+  if (result.success) {
+    out(result);
+    return;
+  }
+  const fallback = await api('GET', '/user/me');
+  out(fallback);
+  if (!fallback.success) process.exit(1);
 }
 
 // ==================== Usage ====================

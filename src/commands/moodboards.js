@@ -167,6 +167,19 @@ async function unlike(moodboardId) {
   if (!result.success) process.exit(1);
 }
 
+// ==================== Admin ====================
+
+async function adminUpdate(moodboardId, opts) {
+  const body = {};
+  if (opts.featured !== undefined) body.is_featured = opts.featured === 'true';
+  if (opts.archived !== undefined) body.is_archived = opts.archived === 'true';
+  if (opts.displayOrder !== undefined) body.display_order = parseInt(opts.displayOrder, 10);
+
+  const result = await api('PUT', `/moodboards/admin/${moodboardId}`, { body });
+  out(result);
+  if (!result.success) process.exit(1);
+}
+
 async function clone(moodboardId) {
   const result = await api('POST', `/moodboards/${moodboardId}/clone`);
   out(result);
@@ -308,4 +321,13 @@ export function register(program) {
     .description('Clone a public moodboard to your account')
     .argument('<moodboard-id>', 'Moodboard UUID')
     .action(clone);
+
+  // Admin (not documented in README)
+  cmd.command('admin-update')
+    .description('Admin: Update moodboard flags')
+    .argument('<moodboard-id>', 'Moodboard UUID')
+    .option('--featured <bool>', 'Featured status')
+    .option('--archived <bool>', 'Archived status')
+    .option('--display-order <n>', 'Display order (lower = first)')
+    .action(adminUpdate);
 }

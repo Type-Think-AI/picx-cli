@@ -1,4 +1,4 @@
-import { api, out, fail } from '../lib/api.js';
+import { api, stream, out, fail } from '../lib/api.js';
 
 async function list(opts) {
   const result = await api('GET', '/albums/', {
@@ -100,8 +100,75 @@ async function publicList(opts) {
   if (!result.success) process.exit(1);
 }
 
+async function generate(prompt, opts) {
+  const body = {
+    message: prompt,
+    tool: opts.tool || 'image',
+    num_images: parseInt(opts.numImages, 10),
+  };
+  if (opts.albumId) body.album_id = opts.albumId;
+  if (opts.model) body.model = opts.model;
+  if (opts.models) body.models = opts.models.split(',');
+  if (opts.size) body.image_size = opts.size;
+  if (opts.aspectRatio) body.aspect_ratio = opts.aspectRatio;
+  if (opts.imageUrl) body.image_urls = [opts.imageUrl];
+
+  // Video options
+  if (opts.videoDuration) body.video_duration = opts.videoDuration;
+  if (opts.videoModel) body.video_model = opts.videoModel;
+  if (opts.videoOrientation) body.video_orientation = opts.videoOrientation;
+  if (opts.startFrame) body.start_frame_url = opts.startFrame;
+  if (opts.endFrame) body.end_frame_url = opts.endFrame;
+
+  const images = [];
+  let albumId = null;
+
+  await stream('/agno/stream/v2', body, (event, data) => {
+    if (event === 'image_generated' || event === 'image_generation_completed' || event === 'image_completed') {
+      const url = data.image_url || data.url;
+      if (url) { images.push(url); process.stderr.write(`Generated: ${url}\n`); }
+    } else if (event === 'video_generated' || event === 'video_generation_completed' || event === 'video_completed') {
+      const url = data.video_url || data.url;
+      if (url) { images.push(url); process.stderr.write(`Video: ${url}\n`); }
+    } else if (event === 'image_generation_failed' || event === 'image_failed' || event === 'video_failed') {
+      process.stderr.write(`Failed: ${data.error || JSON.stringify(data)}\n`);
+    } else if (event === 'image_generation_started') {
+      process.stderr.write(`Generating...\n`);
+    } else if (event === 'album_saved') {
+      albumId = data.album_id;
+    } else if (event === 'message_delta') {
+      if (data.content) process.stderr.write(data.content);
+    } else if (event === 'error') {
+      process.stderr.write(`Error: ${data.message || JSON.stringify(data)}\n`);
+    }
+  });
+
+  process.stderr.write('\n');
+  const result = { success: true, images, album_id: albumId };
+  if (albumId) result.album_url = `https://picxstudio.com/c/${albumId}`;
+  out(result);
+}
+
 export function register(program) {
-  const cmd = program.command('albums').description('Manage albums (chat histories)');
+  const cmd = program.command('albums').description('Manage albums — generate images, manage chat histories');
+
+  cmd.command('generate')
+    .description('Generate images/video (auto-saves to album, supports conversation)')
+    .argument('<prompt>', 'Image description or edit instruction')
+    .option('--album-id <id>', 'Continue in an existing album')
+    .option('-m, --model <model>', 'Image model ID')
+    .option('--models <models>', 'Comma-separated model IDs for multi-model')
+    .option('-s, --size <size>', 'Image size: 1K, 2K, 4K')
+    .option('-a, --aspect-ratio <ratio>', 'Aspect ratio: 1:1, 16:9, 9:16, 4:3')
+    .option('-n, --num-images <count>', 'Number of images (1,2,3,4,6,8,10)', '1')
+    .option('-i, --image-url <url>', 'Reference image URL for editing')
+    .option('--tool <tool>', 'Tool: image, video_prompt, video_frames, video_references', 'image')
+    .option('--video-duration <dur>', 'Video duration: 5s or 8s')
+    .option('--video-model <model>', 'Video model: veo-3.1, veo-3.1-fast')
+    .option('--video-orientation <orient>', 'landscape, portrait, square')
+    .option('--start-frame <url>', 'Start frame image URL')
+    .option('--end-frame <url>', 'End frame image URL')
+    .action(generate);
 
   cmd.command('list')
     .description('List your albums')

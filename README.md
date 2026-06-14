@@ -1,6 +1,6 @@
 # PicX Studio CLI
 
-Full access to PicX Studio API from the terminal. Generate images, manage albums, browse templates, curate moodboards, and more.
+Full access to PicX Studio API from the terminal. Generate images and videos, manage albums, browse templates, curate moodboards, and more.
 
 ## Install
 
@@ -24,14 +24,23 @@ Add it to `~/.bashrc` or `~/.zshrc` to persist across sessions.
 ## Quick Start
 
 ```bash
-# Generate an image
-picx generate "a cat in a spacesuit on Mars"
+# Generate an image (saves to album automatically)
+picx albums generate "a cat in a spacesuit on Mars"
 
-# Edit an image
-picx edit "change background to sunset" --image-url https://example.com/photo.jpg
+# Generate with specific model and size
+picx albums generate "neon city at night" -m gemini-3.1-flash-image-preview -s 2K -a 16:9
 
-# Stream generation with multiple images
-picx stream "cyberpunk cityscape" --num-images 4
+# Generate a video from prompt
+picx albums generate "a sunset timelapse" --tool video_prompt --video-model veo-3.1 --video-duration 8s
+
+# Generate video from frames
+picx albums generate "smooth transition" --tool video_frames --start-frame https://example.com/start.jpg --end-frame https://example.com/end.jpg
+
+# Multi-model generation
+picx albums generate "cyberpunk cityscape" --models gemini-3.1-flash-image-preview,gemini-3-pro-image-preview -n 4
+
+# Continue a conversation in an existing album
+picx albums generate "make it brighter" --album-id <uuid>
 
 # List your albums
 picx albums list
@@ -45,38 +54,52 @@ picx moodboards discover --sort-by popular
 
 ## Commands
 
-### Image Generation
+### Albums — Generate & Manage
+
+The `albums` command handles image/video generation (with auto-save to albums) and album management.
+
+#### Generate Images & Videos
 
 ```bash
-# Generate a single image
-picx generate "neon city at night" -m gemini-3-pro-image-preview -s 2K -a 16:9
+# Image generation (default)
+picx albums generate "a portrait in golden hour light" -m gemini-3.1-flash-image-preview -s 2K -a 16:9
+
+# Multiple images
+picx albums generate "cyberpunk cityscape" -n 4
+
+# Multi-model comparison
+picx albums generate "a red car" --models gemini-3.1-flash-image-preview,gemini-3-pro-image-preview
 
 # Edit an existing image
-picx edit "make it brighter" --image-url https://cdn.example.com/photo.jpg -m gemini-3.1-flash-image-preview -s 2K
+picx albums generate "change background to sunset" -i https://example.com/photo.jpg
 
-# Streaming generation via AI agent (supports image + video)
-picx stream "a futuristic car ad" --num-images 4 --model gemini-3.1-flash-image-preview --size 2K --aspect-ratio 16:9
-picx stream "a sunset timelapse" --tool video_prompt --video-model veo-3.1 --video-duration 8s --video-orientation landscape
-picx stream "animate this" --tool video_frames --start-frame https://example.com/start.jpg --end-frame https://example.com/end.jpg
+# Video from prompt
+picx albums generate "waves crashing on rocks" --tool video_prompt --video-model veo-3.1 --video-duration 8s --video-orientation landscape
+
+# Video from start/end frames
+picx albums generate "smooth zoom transition" --tool video_frames --start-frame https://example.com/start.jpg --end-frame https://example.com/end.jpg
+
+# Video from reference images
+picx albums generate "a person walking" --tool video_references
 ```
 
-| Flag | Short | Description | Commands |
-|------|-------|-------------|----------|
-| `--model` | `-m` | Model ID | generate, edit, stream |
-| `--size` | `-s` | `1K`, `2K`, or `4K` | generate, edit, stream |
-| `--aspect-ratio` | `-a` | `1:1`, `16:9`, `9:16`, `4:3`, `3:2` | generate, stream |
-| `--image-url` | `-i` | Source image URL (required for edit) | edit |
-| `--num-images` | `-n` | Number of images (1,2,3,4,6,8,10) | stream |
-| `--tool` | | `image`, `video_prompt`, `video_frames`, `video_references` | stream |
-| `--video-model` | | `veo-3.1`, `veo-3.1-fast` | stream |
-| `--video-duration` | | `5s` or `8s` | stream |
-| `--video-orientation` | | `landscape`, `portrait`, `square` | stream |
-| `--session-id` | | Session ID for conversation tracking | stream |
-| `--album-id` | | Album ID to persist chat history | stream |
-| `--start-frame` | | Start frame image URL | stream |
-| `--end-frame` | | End frame image URL | stream |
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--model` | `-m` | Image model ID |
+| `--models` | | Comma-separated model IDs for multi-model |
+| `--size` | `-s` | `1K`, `2K`, or `4K` |
+| `--aspect-ratio` | `-a` | `1:1`, `16:9`, `9:16`, `4:3` |
+| `--image-url` | `-i` | Reference image URL (for editing) |
+| `--num-images` | `-n` | Number of images (1,2,3,4,6,8,10) |
+| `--tool` | | `image`, `video_prompt`, `video_frames`, `video_references` |
+| `--video-model` | | `veo-3.1`, `veo-3.1-fast` |
+| `--video-duration` | | `5s` or `8s` |
+| `--video-orientation` | | `landscape`, `portrait`, `square` |
+| `--album-id` | | Continue in an existing album |
+| `--start-frame` | | Start frame image URL (video_frames) |
+| `--end-frame` | | End frame image URL (video_frames) |
 
-### Albums (Chat Histories)
+#### Album Management
 
 ```bash
 picx albums list --limit 20 --offset 0 --archived false --folder-id <id>
@@ -98,12 +121,52 @@ picx albums public --limit 20 --offset 0
 ```bash
 picx templates list --search "portrait" --category photography --limit 10 --page 1
 picx templates list --media-type image --featured true --tags "landscape,sunset"
+picx templates list --target-model gemini-3.1-flash-image-preview --premium false
 picx templates get <template-id>
 picx templates categories
-picx templates create --name "Sunset Glow" --prompt "golden hour..." --tags landscape,sunset --category photography --image-url https://... --media-type image --target-model gemini-3.1-flash-image-preview
-picx templates update <template-id> --name "New Name" --prompt "updated prompt" --tags new,tags --image-url https://...
+picx templates create --name "Sunset Glow" --prompt "golden hour..." --tags landscape,sunset --category photography --image-url https://... --preview-images https://img1.jpg,https://img2.jpg --media-type image --target-model gemini-3.1-flash-image-preview --aspect-ratio 16:9 --description "A warm sunset template"
+
+# Upload local files as thumbnail and gallery images
+picx templates create --name "My Style" --prompt "portrait in..." --image-url ./thumbnail.png --preview-images ./img1.png,./img2.jpg,./img3.webp
+
+# Mix local files and URLs
+picx templates create --name "Mixed" --prompt "landscape..." --image-url ./thumb.jpg --preview-images https://cdn.example.com/a.jpg,./local-b.png
+
+picx templates update <template-id> --name "New Name" --prompt "updated prompt" --tags new,tags --image-url https://... --preview-images https://img1.jpg,https://img2.jpg --aspect-ratio 1:1 --featured true --archived false --premium true
+picx templates update <template-id> --image-url ./new-thumb.png --preview-images ./a.png,./b.png
 picx templates delete <template-id>
 ```
+
+#### Template Admin (requires admin API key)
+
+New templates submitted by users start with `status=pending` and must be approved before they are visible to other users.
+
+```bash
+# List templates by status (default: pending — shows new submissions)
+picx templates admin list
+picx templates admin list --status pending
+picx templates admin list --status approved --limit 50
+picx templates admin list --status archived --page 2
+
+# Approve a single template (makes it visible to all users)
+picx templates admin approve <template-id>
+
+# Archive a single template (hides it permanently)
+picx templates admin archive <template-id>
+
+# Bulk approve or archive multiple templates in one call
+picx templates admin bulk-status --ids 12,15,23 --action approve
+picx templates admin bulk-status --ids 7,8,9 --action archive
+```
+
+**Status lifecycle:** `pending` → `approved` (visible to all) or `archived` (hidden permanently)
+
+| Command | Endpoint | Description |
+|---------|----------|-------------|
+| `admin list` | `GET /admin/templates` | List templates filtered by status |
+| `admin approve <id>` | `PATCH /admin/templates/{id}/approve` | Approve a pending template |
+| `admin archive <id>` | `PATCH /admin/templates/{id}/archive` | Archive a template |
+| `admin bulk-status` | `POST /admin/templates/bulk-status` | Approve or archive in bulk |
 
 ### Moodboards
 
@@ -144,7 +207,7 @@ picx moodboards clone <id>
 picx references list
 picx references get <id>
 picx references create "brand-logo" --image-urls https://cdn.example.com/logo.png --instructions "Use as brand identity" --usage-mode person --thumbnail-url https://...
-picx references update <id> --name "new-name" --image-urls https://new.png --instructions "updated" --usage-mode style
+picx references update <id> --name "new-name" --image-urls https://new.png --instructions "updated" --usage-mode style --thumbnail-url https://...
 picx references delete <id>
 ```
 
@@ -152,7 +215,7 @@ picx references delete <id>
 
 ```bash
 picx auth                    # Check API key
-picx me                      # User profile
+picx me                      # User profile with credit balance
 picx usage --period 30d      # Usage stats (7d, 30d, 90d)
 picx models                  # List available models
 picx model-config            # Full model config (image + video + agent models, settings)
@@ -173,10 +236,9 @@ All commands return JSON:
 ```json
 {
   "success": true,
-  "id": "img_a1b2c3d4e5f6",
-  "url": "https://cdn.picxstudio.com/api/generated/image.png",
-  "model": "gemini-3.1-flash-image-preview",
-  "credits_used": 20
+  "images": ["https://cdn.picxstudio.com/agno/images/img_a1b2c3.png"],
+  "album_id": "uuid-here",
+  "album_url": "https://picxstudio.com/c/uuid-here"
 }
 ```
 
@@ -204,7 +266,7 @@ See [SKILL.md](./SKILL.md) for the skill definition.
 ## Links
 
 - [Developer Portal](https://picxstudio.com/developer) - Get your API key
-- [PicX Studio](https://picxstudio.com) - AI image generation app
+- [PicX Studio](https://picxstudio.com) - AI image & video generation app
 - [npm Package](https://www.npmjs.com/package/picx-cli) - npm registry
 
 ## License

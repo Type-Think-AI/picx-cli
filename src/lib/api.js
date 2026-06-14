@@ -154,4 +154,46 @@ async function stream(path, body, onEvent) {
   }
 }
 
-export { api, upload, stream, out, fail, requireKey };
+/**
+ * Upload a local file and return its CDN URL.
+ * @param {string} filePath - Path to local image file
+ * @returns {Promise<string>} The uploaded image URL
+ */
+async function uploadFile(filePath) {
+  const { readFileSync } = await import('node:fs');
+  const { resolve } = await import('node:path');
+
+  const absPath = resolve(filePath);
+  let buffer;
+  try {
+    buffer = readFileSync(absPath);
+  } catch {
+    throw new Error(`Cannot read file: ${absPath}`);
+  }
+
+  const filename = absPath.split('/').pop();
+  const ext = filename.split('.').pop().toLowerCase();
+  const mimeMap = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' };
+  const contentType = mimeMap[ext] || 'image/png';
+
+  const result = await upload('/agno/upload-image', buffer, filename, contentType);
+  if (!result.success) {
+    throw new Error(result.error || 'Upload failed');
+  }
+  return result.image_url || result.url;
+}
+
+/**
+ * Resolve a value that could be a local file path or a URL.
+ * If it looks like a local file, upload it and return the URL.
+ * @param {string} value - URL or local file path
+ * @returns {Promise<string>} URL
+ */
+async function resolveImageValue(value) {
+  // If it starts with http(s), treat as URL
+  if (/^https?:\/\//i.test(value)) return value;
+  // Otherwise treat as local file path
+  return uploadFile(value);
+}
+
+export { api, upload, stream, out, fail, requireKey, uploadFile, resolveImageValue };
