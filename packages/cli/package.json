@@ -1,0 +1,34 @@
+{
+  "name": "picx-cli",
+  "version": "3.0.0",
+  "description": "PicX Studio CLI - generate and edit images and video from the terminal or an AI agent.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "picx": "./bin/picx.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "picx",
+    "cli",
+    "ai",
+    "image-generation",
+    "video-generation",
+    "mcp"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@picx-devkit/core": "workspace:*",
+    "@picx-devkit/tools": "workspace:*",
+    "commander": "^12.1.0"
+  }
+}

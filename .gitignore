@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Credentials — the CLI writes ~/.config/picx/config.json, but a project-local
+# .picxrc is a supported config layer and would carry a real pxsk_ key.
+.picxrc
+.env
+.env.*
+!.env.example
+
+# Test / coverage
+coverage/
+.vitest/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/mcp.json
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

@@ -1,0 +1,36 @@
+{
+  "name": "picx-mcp",
+  "version": "0.1.0",
+  "description": "PicX Studio MCP server - image and video generation tools for any MCP client.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "picx-mcp": "./bin/picx-mcp.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "picx",
+    "image-generation",
+    "video-generation"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "@picx-devkit/core": "workspace:*",
+    "@picx-devkit/tools": "workspace:*",
+    "zod": "^4.2.0"
+  }
+}
