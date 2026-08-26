@@ -15,12 +15,16 @@ import { registerTemplatesCommand } from "./commands/templates.js";
 import { registerHistoryCommand } from "./commands/history.js";
 import { registerModelsCommand } from "./commands/models.js";
 
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
+
 export const program = new Command();
 
 program
   .name("picx")
-  .description("PicX DevKit CLI — generate images, videos, and manage assets")
-  .version("3.0.0")
+  .description("PicX CLI — generate images, video, and manage assets from the terminal or an AI agent")
+  .version(version)
   .option("--json", "Output machine-readable JSON to stdout")
   .option("--quiet", "Suppress all non-error output")
   .option("--api-key <key>", "PicX API key (overrides env/config)")
