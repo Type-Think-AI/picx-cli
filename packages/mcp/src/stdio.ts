@@ -30,7 +30,7 @@ export async function main(): Promise<void> {
         `  • PICX_API_KEY environment variable\n` +
         `  • .picxrc file in project root: {"apiKey": "pxsk_..."}\n` +
         `  • ~/.config/picx/config.json: {"apiKey": "pxsk_..."}\n` +
-        `  • Run: picx auth login\n\n` +
+        `  • Get a key at https://ai.picxstudio.com/api\n\n` +
         `Get a key at https://picxstudio.com/console/api-keys\n`,
     );
     process.exit(2);
@@ -43,7 +43,7 @@ export async function main(): Promise<void> {
         `  • PICX_API_KEY environment variable\n` +
         `  • .picxrc file in project root: {"apiKey": "pxsk_..."}\n` +
         `  • ~/.config/picx/config.json: {"apiKey": "pxsk_..."}\n` +
-        `  • Run: picx auth login\n\n` +
+        `  • Get a key at https://ai.picxstudio.com/api\n\n` +
         `Get a key at https://picxstudio.com/console/api-keys\n`,
     );
     process.exit(2);

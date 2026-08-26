@@ -102,7 +102,7 @@ export function resolveConfig(overrides?: Partial<ResolvedConfig>): ResolvedConf
 
   if (!apiKey) {
     throw new PicXDevkitError(
-      "No API key found. Set PICX_API_KEY, add it to .picxrc, or run `picx auth login`.",
+      "No API key found. Set PICX_API_KEY, or add it to .picxrc. Get a key at https://ai.picxstudio.com/api",
       "auth_missing",
       EXIT.AUTH,
     );

@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc -b packages/core packages/tools packages/mcp packages/cli",
+    "build": "pnpm -r --filter './packages/**' build",
     "typecheck": "tsc -b packages/core packages/tools packages/mcp packages/cli",
     "test": "vitest run"
   },
@@ -14,7 +14,8 @@
     "@types/node": "22.19.0",
     "typescript": "5.9.3",
     "vitest": "3.2.4",
-    "zod": "^4.2.0"
+    "zod": "^4.2.0",
+    "tsup": "8.5.0"
   },
   "dependencies": {
     "@picx/core": "workspace:*",

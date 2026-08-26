@@ -39,7 +39,7 @@ export function resolveClient(globals: GlobalOpts): PicXClient {
 
   if (!apiKey) {
     process.stderr.write(
-      "Error: no API key found. Set --api-key, PICX_API_KEY env var, or run `picx auth login`.\n",
+      "Error: no API key found. Set --api-key, or the PICX_API_KEY environment variable. Get a key at https://ai.picxstudio.com/api\n",
     );
     process.exit(EXIT.AUTH);
   }

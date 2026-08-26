@@ -172,7 +172,7 @@ function installAction(opts: { client: string; global?: boolean; dryRun?: boolea
 
   // Hint for the user
   process.stderr.write(
-    `\nSet PICX_API_KEY in your environment, or run \`picx auth login\` first.\n`,
+    `\nSet PICX_API_KEY in your environment. Get a key at https://ai.picxstudio.com/api\n`,
   );
 }
 
@@ -241,7 +241,7 @@ function doctorAction(): void {
   check(
     mark(keyPresent),
     "API key present",
-    keyPresent ? `${redactKey(apiKey!)} (${configSource})` : "Set PICX_API_KEY or run `picx auth login`",
+    keyPresent ? `${redactKey(apiKey!)} (${configSource})` : "Set PICX_API_KEY — get a key at https://ai.picxstudio.com/api",
   );
 
   const keyWellFormed = !!apiKey?.startsWith("pxsk_");
