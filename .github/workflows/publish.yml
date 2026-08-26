@@ -37,7 +37,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 22, not 20: pnpm 11 requires Node >= 22.13 (it imports node:sqlite,
+          # which does not exist in Node 20 — the runner died with
+          # ERR_UNKNOWN_BUILTIN_MODULE). This is the BUILD runtime only; the
+          # published packages still declare engines.node >= 20, which is what
+          # consumers need.
+          node-version: 22
           registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
