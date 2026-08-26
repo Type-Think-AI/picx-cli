@@ -1,6 +1,6 @@
 {
   "name": "picx-cli",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "PicX Studio CLI - generate and edit images and video from the terminal or an AI agent.",
   "license": "MIT",
   "type": "module",

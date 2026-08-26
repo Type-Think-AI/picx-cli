@@ -20,6 +20,8 @@ import { picxGenerateVideo, picxGetGeneration } from "./videos.js";
 import { picxUploadAsset, picxListAssets, picxDeleteAsset } from "./assets.js";
 import { picx_list_models } from "./models.js";
 import { picx_get_account, picx_get_usage } from "./account.js";
+import { picx_search_templates, picx_get_template } from "./templates.js";
+import { picx_list_generations } from "./generations.js";
 
 export * from "./types.js";
 export { getModelCost } from "./models.js";
@@ -41,6 +43,9 @@ export const ALL_TOOLS: ToolDef[] = [
   picx_list_models,
   picx_get_account,
   picx_get_usage,
+  picx_search_templates,
+  picx_get_template,
+  picx_list_generations,
 ];
 
 /** Name-keyed registry. Throws on duplicate or unprefixed names. */

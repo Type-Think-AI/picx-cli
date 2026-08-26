@@ -11,6 +11,9 @@ import { registerVideoCommand } from "./commands/video.js";
 import { registerAssetsCommand } from "./commands/assets.js";
 import { registerAccountCommands } from "./commands/account.js";
 import { registerMcpCommand } from "./commands/mcp.js";
+import { registerTemplatesCommand } from "./commands/templates.js";
+import { registerHistoryCommand } from "./commands/history.js";
+import { registerModelsCommand } from "./commands/models.js";
 
 export const program = new Command();
 
@@ -29,8 +32,11 @@ registerImageCommand(program);
 registerVideoCommand(program);
 registerAssetsCommand(program);
 registerAccountCommands(program);
+registerModelsCommand(program);
 // `mcp` is what turns this from a CLI into an agent integration: it writes the
 // MCP client config, serves stdio, and diagnoses a broken connection.
 registerMcpCommand(program);
+registerTemplatesCommand(program);
+registerHistoryCommand(program);
 
 program.parseAsync(process.argv);

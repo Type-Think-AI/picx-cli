@@ -43,7 +43,7 @@ export function registerImageCommand(program: Command): void {
             model: opts.model,
             size: opts.size,
             aspect_ratio: opts.aspectRatio,
-            num_images: Number(opts.num),
+            n: Number(opts.num),
           },
           { client },
         );
@@ -92,7 +92,7 @@ export function registerImageCommand(program: Command): void {
         const result = await tool.handler(
           {
             instruction,
-            images: opts.image,
+            image_urls: opts.image,
             model: opts.model,
             size: opts.size,
           },

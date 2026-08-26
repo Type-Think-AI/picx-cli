@@ -91,14 +91,31 @@ export function printResult(out: ToolOutput, opts: PrintOpts): void {
  *
  * If the error is a PicXDevkitError, its exitCode is used directly.
  * Otherwise defaults to EXIT.UPSTREAM (generic failure).
+ *
+ * When `opts.json` is true (i.e. the global `--json` flag is active), emits a
+ * structured JSON envelope to STDOUT before exiting — so `picx ... --json`
+ * always yields machine-parseable output, even on failure.
  */
-export function fail(err: unknown): never {
+export function fail(err: unknown, opts?: { json?: boolean }): never {
   const message = toUserMessage(err);
-  const code: ExitCode =
+  const exitCode: ExitCode =
     err instanceof PicXDevkitError ? err.exitCode : EXIT.UPSTREAM;
+  const code: string =
+    err instanceof PicXDevkitError ? err.code : "upstream_error";
 
-  process.stderr.write(`${ansi.red}error${ansi.reset}: ${message}\n`);
-  process.exit(code);
+  if (opts?.json) {
+    const envelope = {
+      error: true,
+      message,
+      code,
+      exit_code: exitCode,
+    };
+    process.stdout.write(JSON.stringify(envelope, null, 2) + "\n");
+  } else {
+    process.stderr.write(`${ansi.red}error${ansi.reset}: ${message}\n`);
+  }
+
+  process.exit(exitCode);
 }
 
 // ─── Table printer ───────────────────────────────────────────────────────────

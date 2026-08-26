@@ -35,7 +35,7 @@ export function registerAssetsCommand(program: Command): void {
         const allLinks: { url: string; mimeType?: string; name?: string }[] = [];
 
         for (const file of files) {
-          const result = await tool.handler({ file_path: file }, { client });
+          const result = await tool.handler({ path_or_url: file }, { client });
           if (result.links) allLinks.push(...result.links);
           if (!globals.quiet) {
             process.stderr.write(`Uploaded: ${file} → ${result.links?.[0]?.url ?? "(unknown)"}\n`);
