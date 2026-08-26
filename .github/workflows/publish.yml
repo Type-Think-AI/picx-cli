@@ -1,0 +1,93 @@
+name: publish
+
+# Mirrors the release pattern already working for picx-sdk-js and picx-sdk-python:
+# a push to main publishes, gated ONLY on the version having changed. There is
+# deliberately no lint or test gate here — house rule, so style never blocks a
+# release. Correctness is enforced before the commit, not inside the publish.
+#
+# Why this exists rather than publishing from a laptop: npm refuses `npm publish`
+# from a web-login session token ("Two-factor authentication or granular access
+# token with bypass 2fa enabled is required"). The NPM_TOKEN repo secret is an
+# automation token with that bypass, which is the same mechanism both SDK repos
+# already use.
+#
+# Both packages are gated independently, so bumping one does not republish the
+# other. Publishing an existing version is skipped, not failed — that keeps an
+# unrelated push to main from going red.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/**"
+      - ".github/workflows/publish.yml"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      # tsup bundles the private @picx/* workspace packages into each publishable
+      # dist. Without this the published manifests would declare @picx/core and
+      # @picx/tools, which do not exist on the registry, and every install would
+      # 404. Never publish without building.
+      - run: pnpm -r --filter './packages/**' build
+
+      - name: Verify no private workspace package leaked into a manifest
+        run: |
+          set -euo pipefail
+          for pkg in cli mcp; do
+            leak=$(node -e "
+              const d = require('./packages/$pkg/package.json');
+              const bad = Object.keys(d.dependencies || {}).filter(k => k.startsWith('@picx/'));
+              process.stdout.write(bad.join(','));
+            ")
+            if [ -n "$leak" ]; then
+              echo "::error::packages/$pkg declares unpublishable dependency: $leak"
+              exit 1
+            fi
+          done
+          echo "manifests are self-contained"
+
+      - name: Publish picx-cli if the version is new
+        working-directory: packages/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          V=$(node -p "require('./package.json').version")
+          if npm view "picx-cli@$V" version >/dev/null 2>&1; then
+            echo "picx-cli@$V already published — skipping"
+          else
+            npm publish --access public
+            echo "published picx-cli@$V"
+          fi
+
+      - name: Publish picx-mcp if the version is new
+        working-directory: packages/mcp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          V=$(node -p "require('./package.json').version")
+          if npm view "picx-mcp@$V" version >/dev/null 2>&1; then
+            echo "picx-mcp@$V already published — skipping"
+          else
+            npm publish --access public
+            echo "published picx-mcp@$V"
+          fi
