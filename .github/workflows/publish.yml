@@ -56,7 +56,7 @@ jobs:
       - name: Verify no private workspace package leaked into a manifest
         run: |
           set -euo pipefail
-          for pkg in cli mcp; do
+          for pkg in cli; do
             leak=$(node -e "
               const d = require('./packages/$pkg/package.json');
               const bad = Object.keys(d.dependencies || {}).filter(k => k.startsWith('@picx/'));
@@ -83,16 +83,3 @@ jobs:
             echo "published picx-cli@$V"
           fi
 
-      - name: Publish picx-mcp if the version is new
-        working-directory: packages/mcp
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          set -euo pipefail
-          V=$(node -p "require('./package.json').version")
-          if npm view "picx-mcp@$V" version >/dev/null 2>&1; then
-            echo "picx-mcp@$V already published — skipping"
-          else
-            npm publish --access public
-            echo "published picx-mcp@$V"
-          fi

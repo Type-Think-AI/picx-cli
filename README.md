@@ -3,11 +3,14 @@
 > Generate and edit images and video from the terminal — or hand the same tools to an AI agent via MCP.
 
 [![npm picx-cli](https://img.shields.io/npm/v/picx-cli?label=picx-cli)](https://www.npmjs.com/package/picx-cli)
-[![npm picx-mcp](https://img.shields.io/npm/v/picx-mcp?label=picx-mcp)](https://www.npmjs.com/package/picx-mcp)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-Two packages, one shared tool registry. The CLI and the MCP server are thin adapters over the same
-`ToolDef` objects, so `picx image` and the `picx_generate_image` MCP tool cannot drift.
+The PicX command-line interface. 14 commands over the governed `/v1` API, designed so an AI agent can
+drive it as comfortably as a human.
+
+> **MCP server:** the TypeScript stdio server that briefly lived here is **retired**. The MCP server is
+> being rebuilt in Python on FastMCP 4 as a hosted remote service at `mcp.picxstudio.com` — see
+> [`docs/PLAN-MCP.md`](./docs/PLAN-MCP.md) and [`docs/MCP_ARCHITECTURE.md`](./docs/MCP_ARCHITECTURE.md).
 
 ## Install
 
@@ -105,65 +108,20 @@ picx image "hero shot" --dry-run        # credit cost without spending
 - Local file paths accepted anywhere a URL is — auto-uploaded via `/v1/assets`
 - Never logs or echoes an API key
 
-## MCP Server
-
-Connect PicX to Claude Desktop, Claude Code, Cursor, Codex or VS Code:
-
-```bash
-picx mcp install --client claude        # writes the config for you
-picx mcp doctor                         # verify the setup
-```
-
-Or install manually — add to your client's MCP config:
-
-```json
-{
-  "mcpServers": {
-    "picx": {
-      "command": "npx",
-      "args": ["-y", "picx-mcp"],
-      "env": { "PICX_API_KEY": "pxsk_your_key" }
-    }
-  }
-}
-```
-
-### MCP tools (13 total)
-
-| Tool | Does | Credits |
-|---|---|---|
-| `picx_generate_image` | Text → image | yes |
-| `picx_edit_image` | Edit by instruction | yes |
-| `picx_generate_video` | Text/image/ref → video | yes |
-| `picx_get_generation` | Poll job status | free |
-| `picx_upload_asset` | File → CDN URL | free |
-| `picx_list_assets` | Browse uploads | free |
-| `picx_delete_asset` | Remove an asset | free |
-| `picx_list_models` | Model catalogue | free |
-| `picx_get_account` | Identity + balance | free |
-| `picx_get_usage` | Usage statistics | free |
-| `picx_search_templates` | Search 50K+ templates | free |
-| `picx_get_template` | Template detail | free |
-| `picx_list_generations` | Generation history | free |
-
-Plus prompts (`picx:product_hero`, `picx:thumbnail_ab`, `picx:model_pick`) and resources
-(`picx://models`, `picx://assets/{id}`).
-
 ## Architecture
 
 ```
 picx-cli/
 ├─ packages/
 │  ├─ core/       Config, /v1-pinned API client, error taxonomy, upload bridge
-│  ├─ tools/      Shared tool registry — one definition, two mount points
-│  ├─ mcp/        MCP stdio server (picx-mcp on npm)
+│  ├─ tools/      Tool registry — every command is a ToolDef
 │  └─ cli/        Commander CLI (picx-cli on npm)
 ├─ tests/         Vitest, 97 passing, zero live API calls
 └─ .github/       Version-gated publish workflow
 ```
 
-`@picx/core` and `@picx/tools` are private workspace packages, bundled into the two publishable
-artifacts via tsup `noExternal`. They never reach npm.
+`@picx/core` and `@picx/tools` are private workspace packages, bundled into `picx-cli` via tsup
+`noExternal`. They never reach npm.
 
 All traffic routes through `/v1`, the governed plane that enforces scopes, rate limits, the daily
 credit cap and request logging. The client is pinned to `/v1` with no escape hatch.
@@ -195,7 +153,7 @@ Default API: `https://api.picxstudio.com/v1`. Use `--env dev` for the staging AP
 git clone https://github.com/Type-Think-AI/picx-cli.git
 cd picx-cli
 pnpm install
-pnpm exec tsc -b packages/core packages/tools packages/mcp packages/cli
+pnpm exec tsc -b packages/core packages/tools packages/cli
 pnpm exec vitest run    # 97 tests, all mocked — no credits spent
 ```
 
