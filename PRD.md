@@ -61,19 +61,38 @@ worth keeping, since it is what users type and what agents put in `SKILL.md`.
 access to it is lost, the name cannot be republished without npm support intervention. Confirm access
 before Release 0.1 work starts.
 
-### Repository: rename, don't archive
+### Repository: keep `picx-cli`, no rename
 
-Rename `Type-Think-AI/picx-cli` → `Type-Think-AI/picx-devkit`. GitHub issues a permanent redirect for
-renamed repos, for both web URLs and git remotes, so every existing link keeps working —
-`web-app/README.md`, `ai-ui/src/data/cli.ts` (`CLI_REPO_URL`), the npm `repository` field and the
-package homepage. Archiving and creating a fresh repo would break all of them and discard the repo's
-history and its 1 star for no benefit.
+The existing `Type-Think-AI/picx-cli` repo is reused as-is. **No rename, no new repo.**
 
-Repo state before the rename: 1 star, 0 forks, 0 open issues, 0 watchers, no license set (despite the
-README claiming MIT — fix that on the way through).
+An earlier draft proposed renaming it to `picx-devkit` on the grounds that the repo holds more than a
+CLI. Rejected: "devkit" was a coined container word that no user ever sees — the published artifacts are
+`picx-cli` and `picx-mcp`, and the binary is `picx`. Keeping the existing name means the repo URL, its
+history, its 1 star, the npm `repository` field, `web-app/README.md` and `ai-ui/src/data/cli.ts`
+(`CLI_REPO_URL`) all stay valid with **zero** migration.
+
+Accepted tradeoff: a repo named `picx-cli` also contains the MCP server. That is mitigated by the README
+stating it plainly, and it has precedent — `higgsfield-ai/cli` ships their skills bundle the same way.
 
 Code is replaced wholesale via an orphan branch, so `main` carries **no** v2 code in its history, while
 `v2.3.0-final` remains tagged and reachable for reference. Procedure in §10.
+
+### Why the MCP server shares the CLI's repo
+
+Not a separate repo, and emphatically not inside `web-app`:
+
+- **The shared tool registry is the architecture.** `picx image` and `picx_generate_image` are the same
+  `ToolDef` object, so the two surfaces cannot drift. Splitting repos forces either publishing
+  `@picx/core` and `@picx/tools` publicly as pure plumbing, or duplicating definitions and accepting
+  drift. Both are worse than one repo.
+- **Not in `web-app`.** The MCP server is a TypeScript *client* of the public `/v1` API. Housing it in the
+  API repo couples release cycles and invites shortcutting past `/v1` into internal calls — which
+  reintroduces the ungoverned-plane problem of §2.4 that this design exists to prevent.
+- **Discoverability is solved by the npm name**, `picx-mcp`, plus docs — not by a repo name.
+
+Internal packages use the `@picx/*` scope (`@picx/core`, `@picx/tools`). Both are `private: true` and
+resolve via `workspace:*`, so they never reach npm and the unclaimed `@picx` scope is irrelevant. The
+scope is product-level rather than `@picx-cli/*` because `picx-mcp` imports them too.
 
 ---
 
@@ -464,8 +483,9 @@ git branch legacy/v2 <sha-of-current-main>
 git push origin v2.3.0-final legacy/v2
 ```
 
-Then rename on GitHub — **Settings → Repository name** → `picx-devkit`. GitHub keeps a permanent redirect
-for the old path, so existing clones, links and the npm `repository` field keep resolving.
+**No GitHub rename.** An earlier draft renamed the repo to `picx-devkit`; that step is cancelled, which
+removes a whole migration class — every existing link, the npm `repository` field and the downstream
+references in §10.3 stay valid untouched.
 
 ```bash
 # 2. Clean-slate main: orphan branch carries no v2 code in its history.
@@ -473,7 +493,7 @@ git checkout --orphan main-v3
 git rm -rf . --cached
 # ... scaffold the monorepo (see PLAN.md §3.4) ...
 git add -A
-git commit -m "feat: picx-devkit monorepo — CLI v3 + MCP server, clean rewrite
+git commit -m "feat: PicX CLI v3 + MCP server — clean rewrite
 
 Complete rewrite. No source carried over from v2.
 v2 preserved at tag v2.3.0-final and branch legacy/v2."
@@ -503,7 +523,7 @@ npm view picx-cli dist-tags      # → latest: 3.0.0
 
 # 4. Deprecate only the 2.x range. Semver range — leaves 3.x untouched.
 npm deprecate picx-cli@"<3.0.0" \
-  "picx-cli v2 is no longer functional: it targets a retired API host. Upgrade with 'npm i -g picx-cli@latest' (v3). See https://github.com/Type-Think-AI/picx-devkit"
+  "picx-cli v2 is no longer functional: it targets a retired API host. Upgrade with 'npm i -g picx-cli@latest' (v3). See https://github.com/Type-Think-AI/picx-cli"
 ```
 
 Publish before deprecate, not after — a deprecation notice telling people to upgrade to a version that
@@ -515,14 +535,20 @@ install rather than a hard failure. That is the whole reason for choosing deprec
 
 ### 10.3 Downstream references to update
 
+Keeping the repo name collapses this list. Every URL-shaped reference is already correct — only the
+install instruction and the stale content need touching.
+
 | Location | Current | Change |
 |---|---|---|
 | `ai-ui/src/data/cli.ts` | `INSTALL_COMMAND = "npm i -g github:Type-Think-AI/picx-cli"` | `npm i -g picx-cli` — install from the registry, not from GitHub |
-| `ai-ui/src/data/cli.ts` | `CLI_REPO_URL` | → `picx-devkit` (old URL redirects, but update it anyway) |
 | `ai-ui/src/data/cli.ts` | provenance-warning header block | delete once the file is accurate |
-| `ai-ui/src/data/mcp.ts` | `MCP_SERVER_URL`, 9 fictional tools | real endpoint + real tool list |
-| `web-app/README.md` | `picx-cli` repo reference | → `picx-devkit` |
-| npm `repository` field | `git+https://github.com/Type-Think-AI/picx-cli.git` | → `picx-devkit` |
+| `ai-ui/src/data/cli.ts` | 5 commands, wrong flags, `picx auth` | rewrite against the v3 command tree |
+| `ai-ui/src/data/mcp.ts` | `MCP_SERVER_URL` = `.../sse`, 9 fictional tools | real endpoint + the real 10-tool list |
+| `ai-ui/src/data/docs.ts` | 🔴 `POST /v1/projects`, `/v1/shots`, `/v1/deliver` | delete — none exist |
+| `ai-ui/src/data/skills.ts` | 5 placeholder skills | point at real published skills |
+
+Unchanged, and deliberately so: `CLI_REPO_URL`, `web-app/README.md`'s repo reference, the npm
+`repository` field and the package homepage. All still resolve.
 
 ### 10.4 Rollback
 

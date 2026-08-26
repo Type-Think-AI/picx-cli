@@ -10,9 +10,9 @@
  * 5. Never print an API key — redact to pxsk_…last4.
  */
 
-import { EXIT, PicXDevkitError, toUserMessage } from "@picx-devkit/core";
-import type { ExitCode } from "@picx-devkit/core";
-import type { ToolOutput } from "@picx-devkit/tools";
+import { EXIT, PicXDevkitError, toUserMessage } from "@picx/core";
+import type { ExitCode } from "@picx/core";
+import type { ToolOutput } from "@picx/tools";
 
 export { EXIT };
 export type { ToolOutput };
@@ -20,7 +20,7 @@ export type { ToolOutput };
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 /**
- * `ToolOutput` is imported from `@picx-devkit/tools`, not redeclared here.
+ * `ToolOutput` is imported from `@picx/tools`, not redeclared here.
  *
  * An earlier draft of this file declared its own local `ToolOutput` with a
  * `urls?: string[]` field. That silently diverged from the canonical type, whose

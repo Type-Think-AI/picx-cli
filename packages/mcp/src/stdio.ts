@@ -1,7 +1,7 @@
 /**
  * stdio entry point for the PicX MCP server.
  *
- * Resolves the API key via @picx-devkit/core config resolution (flag → env →
+ * Resolves the API key via @picx/core config resolution (flag → env →
  * .picxrc → ~/.config/picx/config.json), then starts the server on stdio.
  *
  * HARD RULE: never write anything to stdout. stdout is the JSON-RPC transport
@@ -12,7 +12,7 @@
  */
 
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
-import { resolveConfig, redactKey } from "@picx-devkit/core";
+import { resolveConfig, redactKey } from "@picx/core";
 import { createPicxMcpServer } from "./server.js";
 
 /**

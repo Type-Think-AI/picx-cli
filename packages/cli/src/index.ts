@@ -2,7 +2,7 @@
  * CLI entry point — assembles the root `picx` program via commander.
  *
  * Global options: --json, --quiet, --api-key, --env, --dry-run.
- * Commands delegate to ToolDef handlers from @picx-devkit/tools.
+ * Commands delegate to ToolDef handlers from @picx/tools.
  */
 
 import { Command } from "commander";

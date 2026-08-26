@@ -8,10 +8,10 @@ importers:
 
   .:
     dependencies:
-      '@picx-devkit/core':
+      '@picx/core':
         specifier: workspace:*
         version: link:packages/core
-      '@picx-devkit/tools':
+      '@picx/tools':
         specifier: workspace:*
         version: link:packages/tools
     devDependencies:
@@ -30,10 +30,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@picx-devkit/core':
+      '@picx/core':
         specifier: workspace:*
         version: link:../core
-      '@picx-devkit/tools':
+      '@picx/tools':
         specifier: workspace:*
         version: link:../tools
       commander:
@@ -51,10 +51,10 @@ importers:
       '@modelcontextprotocol/server':
         specifier: 2.0.0
         version: 2.0.0
-      '@picx-devkit/core':
+      '@picx/core':
         specifier: workspace:*
         version: link:../core
-      '@picx-devkit/tools':
+      '@picx/tools':
         specifier: workspace:*
         version: link:../tools
       zod:
@@ -63,7 +63,7 @@ importers:
 
   packages/tools:
     dependencies:
-      '@picx-devkit/core':
+      '@picx/core':
         specifier: workspace:*
         version: link:../core
       zod:

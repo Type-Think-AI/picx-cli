@@ -1,5 +1,5 @@
 {
-  "name": "@picx-devkit/core",
+  "name": "@picx/core",
   "version": "3.0.0",
   "private": true,
   "type": "module",

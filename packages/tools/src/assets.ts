@@ -9,7 +9,7 @@
  */
 
 import { z } from "zod";
-import { ensureRemoteUrl } from "@picx-devkit/core";
+import { ensureRemoteUrl } from "@picx/core";
 import type { ToolDef, ToolOutput, ToolContext } from "./types.js";
 
 // ---------------------------------------------------------------------------

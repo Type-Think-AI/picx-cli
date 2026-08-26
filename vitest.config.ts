@@ -8,8 +8,8 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     // Resolve workspace packages
     alias: {
-      "@picx-devkit/tools": resolve(__dirname, "packages/tools/src"),
-      "@picx-devkit/core": resolve(__dirname, "packages/core/src"),
+      "@picx/tools": resolve(__dirname, "packages/tools/src"),
+      "@picx/core": resolve(__dirname, "packages/core/src"),
     },
   },
 });

@@ -188,10 +188,11 @@ Keep a `/sse` alias returning 410 with a pointer, for anyone who copied the old 
 
 ### 3.4 Repo
 
-New repo `Type-Think-AI/picx-devkit`, public, MIT (matches SDK licensing and Higgsfield's public CLI repo).
+Existing repo `Type-Think-AI/picx-cli`, reused as-is. Public, MIT (matches SDK licensing and
+Higgsfield's public CLI repo).
 
 ```
-picx-devkit/
+picx-cli/
 ├─ packages/
 │  ├─ core/          config resolution · credential store · api client · errors · output fmt
 │  ├─ tools/         tool registry (name, description, zod schema, handler)
@@ -224,8 +225,8 @@ Two separate decisions, conflated in earlier drafts of this section:
 | `picx` | 🔴 taken by a third party — unavailable |
 
 Binary stays `picx`, unchanged from v2 — the one piece of continuity worth keeping.
-Repo `Type-Think-AI/picx-cli` is **renamed** to `picx-devkit` (GitHub redirects permanently, so existing
-links survive), not archived. Full cutover procedure in `PRD.md` §10.
+Repo `Type-Think-AI/picx-cli` keeps its name — no rename, so every existing link stays valid.
+Full cutover procedure in `PRD.md` §10.
 
 ---
 
@@ -505,8 +506,8 @@ de-risk 3 by proving the tool surface before we bind an OAuth scope model to it.
 
 | # | Decision | My recommendation |
 |---|---|---|
-| 1 | Repo name | `picx-devkit`, public, MIT |
-| 2 | Reuse v2 code or start clean | **Start clean.** Rename the repo to `picx-devkit`, orphan-branch `main`, keep `v2.3.0-final` tagged |
+| 1 | Repo name | Keep `picx-cli`. No rename — "devkit" was a coined word no user sees |
+| 2 | Reuse v2 code or start clean | **Start clean.** Orphan-branch `main`, keep `v2.3.0-final` tagged and `legacy/v2` preserved |
 | 3 | Package names | Keep `picx-cli` → publish `3.0.0`. Sibling `picx-mcp`. Never unpublish — deprecate `<3.0.0` |
 | 4 | MCP hostname | `mcp.picxstudio.com/mcp` |
 | 5 | Ship API-key MCP first, or wait for OAuth | Ship first |

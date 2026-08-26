@@ -1,5 +1,5 @@
 {
-  "name": "@picx-devkit/tools",
+  "name": "@picx/tools",
   "version": "3.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@picx-devkit/core": "workspace:*",
+    "@picx/core": "workspace:*",
     "zod": "^4.2.0"
   }
 }

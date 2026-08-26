@@ -1,5 +1,5 @@
 /**
- * @picx-devkit/core — shared internals for the CLI and the MCP server.
+ * @picx/core — shared internals for the CLI and the MCP server.
  *
  * Deliberately narrow: config resolution, the pinned-to-/v1 API client, the
  * error/exit-code taxonomy, and the local-file upload bridge. Nothing here

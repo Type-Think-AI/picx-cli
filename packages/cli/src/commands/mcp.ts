@@ -29,7 +29,7 @@ import {
 import { resolve, join, dirname } from "node:path";
 import { homedir, platform } from "node:os";
 import { execSync, execFileSync } from "node:child_process";
-import { resolveConfig, redactKey } from "@picx-devkit/core";
+import { resolveConfig, redactKey } from "@picx/core";
 import { check, info, warn, fail } from "../output.js";
 
 // ─── Client config resolution ────────────────────────────────────────────────
@@ -94,7 +94,7 @@ function getGlobalCursorPath(): string {
 function buildServerStanza(): Record<string, unknown> {
   return {
     command: "npx",
-    args: ["-y", "@picx-devkit/mcp"],
+    args: ["-y", "@picx/mcp"],
     env: {
       PICX_API_KEY: "${PICX_API_KEY}",
     },
@@ -181,7 +181,7 @@ function installAction(opts: { client: string; global?: boolean; dryRun?: boolea
 function serveAction(): void {
   // exec replaces the process — the stdio MCP server takes over
   try {
-    const binPath = require.resolve("@picx-devkit/mcp/bin/picx-mcp.js");
+    const binPath = require.resolve("@picx/mcp/bin/picx-mcp.js");
     // execFileSync replaces stdout/stderr/stdin naturally for stdio transport
     execFileSync(process.execPath, [binPath], {
       stdio: "inherit",
@@ -190,7 +190,7 @@ function serveAction(): void {
   } catch (err: unknown) {
     // If require.resolve fails, try npx fallback
     try {
-      execSync("npx @picx-devkit/mcp", {
+      execSync("npx @picx/mcp", {
         stdio: "inherit",
         env: process.env,
       });

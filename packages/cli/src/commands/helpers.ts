@@ -3,8 +3,8 @@
  */
 
 import { Command } from "commander";
-import { PicXClient, DEFAULT_BASE_URL, DEV_BASE_URL } from "@picx-devkit/core";
-import { resolveConfig } from "@picx-devkit/core";
+import { PicXClient, DEFAULT_BASE_URL, DEV_BASE_URL } from "@picx/core";
+import { resolveConfig } from "@picx/core";
 import { fail, EXIT } from "../output.js";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join, basename } from "node:path";

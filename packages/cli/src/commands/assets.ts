@@ -9,7 +9,7 @@
 import { Command } from "commander";
 import { resolveClient, globalOpts } from "./helpers.js";
 import { printResult, fail, EXIT } from "../output.js";
-import { registry } from "@picx-devkit/tools";
+import { registry } from "@picx/tools";
 
 export function registerAssetsCommand(program: Command): void {
   // picx upload <file...>

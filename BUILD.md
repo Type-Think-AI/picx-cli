@@ -141,7 +141,7 @@ One owner per file. **Never edit a file you do not own** — if you need a chang
 state it in your report instead.
 
 ```
-picx-devkit/
+picx-cli/
 ├─ package.json                      [OWNER: lead]
 ├─ pnpm-workspace.yaml               [OWNER: lead]
 ├─ tsconfig.base.json                [OWNER: lead]

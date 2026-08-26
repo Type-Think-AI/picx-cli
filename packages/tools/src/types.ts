@@ -13,7 +13,7 @@
  */
 
 import type { ZodRawShape } from "zod";
-import type { PicXClient } from "@picx-devkit/core";
+import type { PicXClient } from "@picx/core";
 
 /** What a tool handler may do to the world. Mirrors MCP's ToolAnnotations. */
 export type ToolEffect = {

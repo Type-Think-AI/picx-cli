@@ -2,21 +2,21 @@
  * PicX MCP Server factory.
  *
  * Constructs a McpServer instance with every tool, prompt, and resource from
- * @picx-devkit/tools registered. The single export is `createPicxMcpServer` —
+ * @picx/tools registered. The single export is `createPicxMcpServer` —
  * call it with an API key and optionally a base URL, then connect a transport.
  *
  * @module
  */
 
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
-import { PicXClient, toUserMessage } from "@picx-devkit/core";
+import { PicXClient, toUserMessage } from "@picx/core";
 import {
   ALL_TOOLS,
   PROMPTS,
   RESOURCES,
-} from "@picx-devkit/tools";
-import type { ToolDef, ToolContext, ToolOutput } from "@picx-devkit/tools";
-import type { PromptDef, ResourceDef } from "@picx-devkit/tools";
+} from "@picx/tools";
+import type { ToolDef, ToolContext, ToolOutput } from "@picx/tools";
+import type { PromptDef, ResourceDef } from "@picx/tools";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,7 +106,7 @@ export function createPicxMcpServer(opts: CreateServerOptions): McpServer {
 
   // ─── Register tools ──────────────────────────────────────────────────────
 
-  // The MCP SDK (v2.0.0) imports types from "zod/v4" while @picx-devkit/tools
+  // The MCP SDK (v2.0.0) imports types from "zod/v4" while @picx/tools
   // uses the default "zod" entry (classic compat). At runtime both resolve to
   // the same zod 4.x shapes, but TypeScript sees them as incompatible:
   //   - MCP's local ZodRawShape = Record<string, z.ZodType> (from zod/v4)

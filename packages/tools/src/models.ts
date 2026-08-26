@@ -7,7 +7,7 @@
  */
 
 import { z } from "zod";
-import type { PicXClient } from "@picx-devkit/core";
+import type { PicXClient } from "@picx/core";
 
 /** Matches the picx-ai SDK's ModelType */
 type ModelType = "image" | "video" | "audio";

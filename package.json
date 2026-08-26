@@ -1,5 +1,5 @@
 {
-  "name": "picx-devkit",
+  "name": "picx-workspace",
   "private": true,
   "type": "module",
   "engines": {
@@ -17,7 +17,7 @@
     "zod": "^4.2.0"
   },
   "dependencies": {
-    "@picx-devkit/core": "workspace:*",
-    "@picx-devkit/tools": "workspace:*"
+    "@picx/core": "workspace:*",
+    "@picx/tools": "workspace:*"
   }
 }

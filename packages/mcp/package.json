@@ -29,8 +29,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
-    "@picx-devkit/core": "workspace:*",
-    "@picx-devkit/tools": "workspace:*",
+    "@picx/core": "workspace:*",
+    "@picx/tools": "workspace:*",
     "zod": "^4.2.0"
   }
 }

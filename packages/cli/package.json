@@ -27,8 +27,8 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@picx-devkit/core": "workspace:*",
-    "@picx-devkit/tools": "workspace:*",
+    "@picx/core": "workspace:*",
+    "@picx/tools": "workspace:*",
     "commander": "^12.1.0"
   }
 }

@@ -7,7 +7,7 @@
 
 import { z } from "zod";
 import type { ToolDef, ToolOutput, ToolContext } from "./types.js";
-import { ensureRemoteUrls } from "@picx-devkit/core";
+import { ensureRemoteUrls } from "@picx/core";
 
 // ---------------------------------------------------------------------------
 // picx_generate_image
