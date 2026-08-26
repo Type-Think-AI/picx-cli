@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "picx": "./bin/picx.js"
+    "picx": "bin/picx.js"
   },
   "files": [
     "dist",

@@ -5,10 +5,9 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "picx-mcp": "./bin/picx-mcp.js"
+    "picx-mcp": "bin/picx-mcp.js"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/server.js",
   "files": [
     "dist",
     "bin",
@@ -35,5 +34,13 @@
   "devDependencies": {
     "@picx/core": "workspace:*",
     "@picx/tools": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/server.js"
+    },
+    "./stdio": {
+      "import": "./dist/stdio.js"
+    }
   }
 }
