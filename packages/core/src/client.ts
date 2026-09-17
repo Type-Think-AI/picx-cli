@@ -59,6 +59,10 @@ export class PicXClient {
     this.sdk = new PicX({
       apiKey: opts.apiKey,
       baseUrl,
+      // Identify the CLI surface. defaultHeaders is spread after the SDK's own
+      // "X-PicX-Source": "sdk-js" default, so this wins and the server records
+      // "cli" rather than "sdk-js" for CLI-originated generations.
+      defaultHeaders: { "X-PicX-Source": "cli" },
       ...(opts.timeoutMs !== undefined ? { timeout: opts.timeoutMs } : {}),
       ...(opts.maxRetries !== undefined ? { maxRetries: opts.maxRetries } : {}),
     });
