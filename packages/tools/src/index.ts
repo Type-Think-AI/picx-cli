@@ -22,6 +22,11 @@ import { picx_list_models } from "./models.js";
 import { picx_get_account, picx_get_usage } from "./account.js";
 import { picx_search_templates, picx_get_template } from "./templates.js";
 import { picx_list_generations } from "./generations.js";
+import {
+  picx_generation_deliveries,
+  picx_webhook_deliveries,
+  picx_redeliver_webhook,
+} from "./webhooks.js";
 
 export * from "./types.js";
 export { getModelCost } from "./models.js";
@@ -46,6 +51,9 @@ export const ALL_TOOLS: ToolDef[] = [
   picx_search_templates,
   picx_get_template,
   picx_list_generations,
+  picx_generation_deliveries,
+  picx_webhook_deliveries,
+  picx_redeliver_webhook,
 ];
 
 /** Name-keyed registry. Throws on duplicate or unprefixed names. */

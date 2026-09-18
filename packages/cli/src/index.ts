@@ -14,6 +14,8 @@ import { registerMcpCommand } from "./commands/mcp.js";
 import { registerTemplatesCommand } from "./commands/templates.js";
 import { registerHistoryCommand } from "./commands/history.js";
 import { registerModelsCommand } from "./commands/models.js";
+import { registerWebhookCommand } from "./commands/webhook.js";
+import { registerGenerationCommand } from "./commands/generation.js";
 
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
@@ -42,5 +44,7 @@ registerModelsCommand(program);
 registerMcpCommand(program);
 registerTemplatesCommand(program);
 registerHistoryCommand(program);
+registerWebhookCommand(program);
+registerGenerationCommand(program);
 
 program.parseAsync(process.argv);

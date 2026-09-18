@@ -14,20 +14,20 @@ export function registerVideoCommand(program: Command): void {
   // picx video <prompt>
   program
     .command("video")
-    .argument("<prompt>", "Generation prompt")
-    .option("--mode <mode>", "Generation mode (standard, lipsync, frames, extend, edit, upscale, repaint)")
+    .argument("[prompt]", "Generation prompt (required for every mode except lipsync)")
+    .option("--mode <mode>", "Generation mode: text, image, reference, frames, extend, lipsync, edit", "text")
     .option("--duration <seconds>", "Video duration in seconds")
-    .option("--resolution <res>", "Output resolution")
+    .option("--resolution <res>", "Output resolution: 480p, 720p, 1080p")
     .option("--sound", "Enable sound generation (default)")
     .option("--no-sound", "Disable sound generation")
-    .option("--image <path>", "Reference image path or URL")
-    .option("--reference <path>", "Style reference image path or URL")
-    .option("--start-frame <path>", "Start frame image path or URL")
-    .option("--end-frame <path>", "End frame image path or URL")
-    .option("--source-video <path>", "Source video path or URL (for extend/edit modes)")
-    .option("--audio <path>", "Audio file path or URL (for lipsync)")
-    .description("Generate a video from a text prompt")
-    .action(async (prompt: string, opts) => {
+    .option("--image <url>", "Seed image URL (mode image/edit)")
+    .option("--reference <url...>", "Style reference image URL(s) (mode reference)")
+    .option("--start-frame <url>", "Start frame image URL (mode frames)")
+    .option("--end-frame <url>", "End frame image URL (mode frames, optional)")
+    .option("--source-video <url>", "Source video URL (mode extend/lipsync/edit)")
+    .option("--audio <url>", "Audio track URL (mode lipsync)")
+    .description("Generate a video (7 modes; lipsync needs no prompt)")
+    .action(async (prompt: string | undefined, opts) => {
       const globals = globalOpts(program);
       const tool = registry["picx_generate_video"];
       if (!tool) return fail("Tool picx_generate_video not found in registry");
@@ -50,7 +50,7 @@ export function registerVideoCommand(program: Command): void {
             resolution: opts.resolution,
             sound: opts.sound,
             image_url: opts.image,
-            reference_url: opts.reference,
+            reference_urls: opts.reference,
             start_frame_url: opts.startFrame,
             end_frame_url: opts.endFrame,
             source_video_url: opts.sourceVideo,

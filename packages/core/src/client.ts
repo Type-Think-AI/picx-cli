@@ -1,7 +1,7 @@
 /**
  * PicX API client — the one place that talks to the platform.
  *
- * Thin wrapper over the published `picx-ai` SDK (v0.3.1, zero runtime deps,
+ * Thin wrapper over the published `picx-ai` SDK (v0.4.0, zero runtime deps,
  * ships its own GenerationJob poller). We do not re-implement HTTP; we add
  * the DevKit's own concerns: a redacting error path, a resolved base URL, and
  * a narrow surface so tool modules cannot reach arbitrary endpoints.
@@ -88,5 +88,8 @@ export class PicXClient {
   }
   get webhooks() {
     return this.sdk.webhooks;
+  }
+  get templates() {
+    return this.sdk.templates;
   }
 }

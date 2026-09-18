@@ -19,8 +19,11 @@ import { z } from "zod";
 import imageTools from "../packages/tools/src/images.js";
 import videoTools from "../packages/tools/src/videos.js";
 import assetTools from "../packages/tools/src/assets.js";
+import webhookTools from "../packages/tools/src/webhooks.js";
 import { picx_list_models } from "../packages/tools/src/models.js";
 import { picx_get_account, picx_get_usage } from "../packages/tools/src/account.js";
+import { picx_search_templates, picx_get_template } from "../packages/tools/src/templates.js";
+import { picx_list_generations } from "../packages/tools/src/generations.js";
 import { buildRegistry, type ToolDef } from "../packages/tools/src/types.js";
 
 // ---------------------------------------------------------------------------
@@ -31,9 +34,13 @@ const allTools: ToolDef[] = [
   ...imageTools,
   ...videoTools,
   ...assetTools,
+  ...webhookTools,
   picx_list_models,
   picx_get_account,
   picx_get_usage,
+  picx_search_templates,
+  picx_get_template,
+  picx_list_generations,
 ];
 
 // ---------------------------------------------------------------------------
@@ -129,6 +136,12 @@ describe("schema validation: happy path and invalid args", () => {
     picx_list_models: {},
     picx_get_account: {},
     picx_get_usage: {},
+    picx_search_templates: {},
+    picx_get_template: { template_id: "tpl_abc123" },
+    picx_list_generations: {},
+    picx_generation_deliveries: { generation_id: "gen_abc123" },
+    picx_webhook_deliveries: { webhook_id: "wh_abc123" },
+    picx_redeliver_webhook: { delivery_id: "del_abc123" },
   };
 
   const invalidArgs: Record<string, Record<string, unknown>> = {
@@ -140,6 +153,11 @@ describe("schema validation: happy path and invalid args", () => {
     picx_delete_asset: { asset_id: "" }, // min(1) violation
     picx_list_models: { type: "audio" }, // not in enum ["image", "video"]
     picx_get_usage: { period: "999d" }, // not in enum
+    picx_search_templates: { media_type: "audio" }, // not in enum ["image", "video"]
+    picx_get_template: { template_id: "" }, // min(1) violation
+    picx_generation_deliveries: { generation_id: "" }, // min(1) violation
+    picx_webhook_deliveries: { webhook_id: "" }, // min(1) violation
+    picx_redeliver_webhook: { delivery_id: "" }, // min(1) violation
   };
 
   for (const tool of allTools) {
@@ -173,6 +191,9 @@ describe("readOnlyHint annotations", () => {
     "picx_generate_video",
     "picx_upload_asset",
     "picx_delete_asset",
+    // Spends no credits, but triggers a real outbound delivery, so it is a
+    // side-effecting (non-read-only) tool.
+    "picx_redeliver_webhook",
   ];
 
   /** Tools that only read → readOnlyHint MUST be true */
@@ -182,6 +203,11 @@ describe("readOnlyHint annotations", () => {
     "picx_list_models",
     "picx_get_account",
     "picx_get_usage",
+    "picx_search_templates",
+    "picx_get_template",
+    "picx_list_generations",
+    "picx_generation_deliveries",
+    "picx_webhook_deliveries",
   ];
 
   for (const name of creditSpendingTools) {
@@ -214,7 +240,8 @@ describe("video mode matrix validation", () => {
     client: {
       baseUrl: "https://api.picxstudio.com/v1",
       videos: {
-        generate: async () => ({ id: "gen_mock", status: "queued" }),
+        // The handler calls ctx.client.videos.create(body).
+        create: async () => ({ id: "gen_mock", status: "queued" }),
       },
     },
     progress: undefined,
@@ -223,31 +250,32 @@ describe("video mode matrix validation", () => {
 
   const videoTool = allTools.find((t) => t.name === "picx_generate_video")!;
 
-  // A 'frames' mode test lived here. It is now covered by the
-  // "does not yet expose the four SDK-unsupported modes" test below, which
-  // asserts the enum rejects it outright rather than asserting a field-level
-  // validation message the tool no longer reaches.
+  const URL = "https://cdn.example.com/x";
 
-  it("rejects 'image' mode without image_url", async () => {
-    await expect(
-      videoTool.handler({ prompt: "pan across this", mode: "image" }, mockCtx),
-    ).rejects.toThrow("image_url");
+  // ── enum ────────────────────────────────────────────────────────────────
+  it("accepts all seven modes in the mode enum", () => {
+    const modeSchema = videoTool.inputSchema.mode;
+    for (const mode of ["text", "image", "reference", "frames", "extend", "lipsync", "edit"]) {
+      expect(modeSchema.safeParse(mode).success, `mode '${mode}' should parse`).toBe(true);
+    }
   });
 
-  it("rejects 'reference' mode without reference_urls", async () => {
-    await expect(
-      videoTool.handler({ prompt: "in this style", mode: "reference" }, mockCtx),
-    ).rejects.toThrow("reference_urls");
+  it("rejects an unknown mode", () => {
+    expect(videoTool.inputSchema.mode.safeParse("upscale").success).toBe(false);
   });
 
-  it("requires a prompt for every supported mode", async () => {
-    for (const mode of ["text", "image", "reference"]) {
+  // ── prompt requirement ────────────────────────────────────────────────────
+  it("requires a prompt for every mode except lipsync", async () => {
+    for (const mode of ["text", "image", "reference", "frames", "extend", "edit"]) {
       await expect(
         videoTool.handler(
           {
             mode,
-            image_url: "https://cdn.example.com/i.png",
-            reference_urls: ["https://cdn.example.com/ref.png"],
+            image_url: URL,
+            reference_urls: [URL],
+            start_frame_url: URL,
+            source_video_url: URL,
+            audio_url: URL,
           },
           mockCtx,
         ),
@@ -255,29 +283,90 @@ describe("video mode matrix validation", () => {
     }
   });
 
-  /**
-   * The API accepts seven video modes, but picx-ai@0.3.1 types VideoMode as only
-   * "text" | "image" | "reference" and carries none of the fields the other four
-   * need (start_frame_url, end_frame_url, source_video_url, audio_url). Exposing
-   * them would fail at runtime inside the SDK with a confusing error, so the tool
-   * deliberately narrows the enum.
-   *
-   * This test pins that narrowing. When picx-ai v0.4.0 adds the missing modes and
-   * fields, this test SHOULD fail — that failure is the signal to widen the enum,
-   * restore the per-mode validation for the four modes, and re-add the
-   * prompt-optional case for lipsync (the only mode that needs no prompt).
-   */
-  it("does not yet expose the four SDK-unsupported modes", () => {
-    const modeSchema = videoTool.inputSchema.mode;
-    for (const mode of ["frames", "extend", "lipsync", "edit"]) {
-      const parsed = modeSchema.safeParse(mode);
-      expect(
-        parsed.success,
-        `mode '${mode}' parsed successfully — picx-ai may now support it; see the comment above`,
-      ).toBe(false);
-    }
-    for (const mode of ["text", "image", "reference"]) {
-      expect(modeSchema.safeParse(mode).success).toBe(true);
-    }
+  it("does NOT require a prompt for lipsync", async () => {
+    await expect(
+      videoTool.handler(
+        { mode: "lipsync", source_video_url: URL, audio_url: URL },
+        mockCtx,
+      ),
+    ).resolves.toBeDefined();
+  });
+
+  // ── per-mode required fields ───────────────────────────────────────────────
+  it("rejects 'image' mode without image_url", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "image" }, mockCtx),
+    ).rejects.toThrow("image_url");
+  });
+
+  it("rejects 'reference' mode without reference_urls", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "reference" }, mockCtx),
+    ).rejects.toThrow("reference_urls");
+  });
+
+  it("rejects 'frames' mode without start_frame_url", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "frames" }, mockCtx),
+    ).rejects.toThrow("start_frame_url");
+  });
+
+  it("accepts 'frames' mode with start_frame_url alone (end_frame_url optional)", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "frames", start_frame_url: URL }, mockCtx),
+    ).resolves.toBeDefined();
+  });
+
+  it("rejects 'extend' mode without source_video_url", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "extend" }, mockCtx),
+    ).rejects.toThrow("source_video_url");
+  });
+
+  it("rejects 'lipsync' mode without audio_url", async () => {
+    await expect(
+      videoTool.handler({ mode: "lipsync", source_video_url: URL }, mockCtx),
+    ).rejects.toThrow("audio_url");
+  });
+
+  it("rejects 'lipsync' mode without source_video_url", async () => {
+    await expect(
+      videoTool.handler({ mode: "lipsync", audio_url: URL }, mockCtx),
+    ).rejects.toThrow("source_video_url");
+  });
+
+  it("rejects 'edit' mode without image_url (source_video_url present)", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "edit", source_video_url: URL }, mockCtx),
+    ).rejects.toThrow("image_url");
+  });
+
+  it("rejects 'edit' mode without source_video_url", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "edit", image_url: URL }, mockCtx),
+    ).rejects.toThrow("source_video_url");
+  });
+
+  it("accepts 'edit' mode with both source_video_url and image_url", async () => {
+    await expect(
+      videoTool.handler(
+        { prompt: "p", mode: "edit", source_video_url: URL, image_url: URL },
+        mockCtx,
+      ),
+    ).resolves.toBeDefined();
+  });
+
+  // ── URL format ──────────────────────────────────────────────────────────
+  it("rejects a non-http URL for a required media field", async () => {
+    await expect(
+      videoTool.handler({ prompt: "p", mode: "image", image_url: "s3://bucket/x" }, mockCtx),
+    ).rejects.toThrow(/http/);
+  });
+
+  // ── happy path: text ──────────────────────────────────────────────────────
+  it("accepts 'text' mode with just a prompt", async () => {
+    await expect(
+      videoTool.handler({ prompt: "a sunset timelapse", mode: "text" }, mockCtx),
+    ).resolves.toBeDefined();
   });
 });
