@@ -97,9 +97,9 @@ picx usage --period 30d
 | `picx balance` | Credit balance |
 | `picx usage` | Credit usage for a period. `--period 7d\|30d\|90d` |
 | `picx tier` | Subscription tier info |
-| `picx mcp install` | Wire the MCP server into a client |
-| `picx mcp serve` | Start the stdio MCP server |
-| `picx mcp doctor` | Diagnose a broken setup |
+| `picx mcp install --client <name>` | Register PicX's hosted MCP server (`mcp.picxstudio.com`, OAuth 2.1) in a client's config — `claude`, `claude-code`, `cursor`, `codex`, `vscode` |
+| `picx mcp uninstall --client <name>` | Remove PicX's entry from a client's config |
+| `picx mcp doctor` | Check the MCP server's reachability and which clients have it registered |
 
 ## For AI agents
 
